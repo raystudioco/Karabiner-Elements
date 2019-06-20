@@ -21,6 +21,8 @@ krbn::event_queue::event button2_event(krbn::pointing_button::button2);
 
 krbn::event_queue::event caps_lock_state_changed_1_event(krbn::event_queue::event::type::caps_lock_state_changed, 1);
 krbn::event_queue::event caps_lock_state_changed_0_event(krbn::event_queue::event::type::caps_lock_state_changed, 0);
+krbn::event_queue::event num_lock_state_changed_1_event(krbn::event_queue::event::type::num_lock_state_changed, 1);
+krbn::event_queue::event num_lock_state_changed_0_event(krbn::event_queue::event::type::num_lock_state_changed, 0);
 
 auto device_keys_and_pointing_buttons_are_released_event = krbn::event_queue::event::make_device_keys_and_pointing_buttons_are_released_event();
 } // namespace
@@ -95,6 +97,15 @@ TEST_CASE("json") {
     expected["type"] = "caps_lock_state_changed";
     expected["caps_lock_state_changed"] = 1;
     auto json = caps_lock_state_changed_1_event.to_json();
+    REQUIRE(json == expected);
+    auto event_from_json = krbn::event_queue::event::make_from_json(json);
+    REQUIRE(json == event_from_json.to_json());
+  }
+  {
+    nlohmann::json expected;
+    expected["type"] = "num_lock_state_changed";
+    expected["num_lock_state_changed"] = 1;
+    auto json = num_lock_state_changed_1_event.to_json();
     REQUIRE(json == expected);
     auto event_from_json = krbn::event_queue::event::make_from_json(json);
     REQUIRE(json == event_from_json.to_json());
@@ -213,6 +224,8 @@ TEST_CASE("get_key_code") {
   REQUIRE(button2_event.get_key_code() == std::nullopt);
   REQUIRE(caps_lock_state_changed_1_event.get_key_code() == std::nullopt);
   REQUIRE(caps_lock_state_changed_0_event.get_key_code() == std::nullopt);
+  REQUIRE(num_lock_state_changed_1_event.get_key_code() == std::nullopt);
+  REQUIRE(num_lock_state_changed_0_event.get_key_code() == std::nullopt);
   REQUIRE(device_keys_and_pointing_buttons_are_released_event.get_key_code() == std::nullopt);
 }
 
@@ -485,6 +498,35 @@ TEST_CASE("caps_lock_state_changed") {
     ENQUEUE_EVENT(event_queue, 1, 100, caps_lock_state_changed_1_event, single, caps_lock_state_changed_1_event);
 
     REQUIRE(event_queue.get_modifier_flag_manager().is_pressed(krbn::modifier_flag::caps_lock) == true);
+  }
+}
+
+TEST_CASE("num_lock_state_changed") {
+  {
+    krbn::event_queue::queue event_queue;
+
+    // modifier_flag_manager's num lock state will not be changed by key_down event.
+    ENQUEUE_EVENT(event_queue, 1, 100, num_lock_event, key_down, num_lock_event);
+
+    REQUIRE(event_queue.get_modifier_flag_manager().is_pressed(krbn::modifier_flag::num_lock) == false);
+
+    ENQUEUE_EVENT(event_queue, 1, 100, num_lock_state_changed_1_event, single, num_lock_state_changed_1_event);
+
+    REQUIRE(event_queue.get_modifier_flag_manager().is_pressed(krbn::modifier_flag::num_lock) == true);
+
+    // Send twice
+
+    ENQUEUE_EVENT(event_queue, 1, 100, num_lock_state_changed_1_event, single, num_lock_state_changed_1_event);
+
+    REQUIRE(event_queue.get_modifier_flag_manager().is_pressed(krbn::modifier_flag::num_lock) == true);
+
+    ENQUEUE_EVENT(event_queue, 1, 100, num_lock_state_changed_0_event, single, num_lock_state_changed_0_event);
+
+    REQUIRE(event_queue.get_modifier_flag_manager().is_pressed(krbn::modifier_flag::num_lock) == false);
+
+    ENQUEUE_EVENT(event_queue, 1, 100, num_lock_state_changed_1_event, single, num_lock_state_changed_1_event);
+
+    REQUIRE(event_queue.get_modifier_flag_manager().is_pressed(krbn::modifier_flag::num_lock) == true);
   }
 }
 

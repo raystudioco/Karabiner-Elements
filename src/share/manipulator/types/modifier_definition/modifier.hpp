@@ -23,6 +23,7 @@ enum class modifier {
   right_option,
   right_shift,
   shift,
+  num_lock,
   end_,
 };
 
@@ -33,6 +34,9 @@ inline void to_json(nlohmann::json& json, const modifier& value) {
       break;
     case modifier::caps_lock:
       json = "caps_lock";
+      break;
+    case modifier::num_lock:
+      json = "num_lock";
       break;
     case modifier::command:
       json = "command";
@@ -91,6 +95,8 @@ inline void from_json(const nlohmann::json& json, modifier& value) {
     value = modifier::any;
   } else if (name == "caps_lock") {
     value = modifier::caps_lock;
+  } else if (name == "num_lock") {
+    value = modifier::num_lock;
   } else if (name == "command") {
     value = modifier::command;
   } else if (name == "control") {

@@ -10,9 +10,11 @@ public:
   device(const nlohmann::json& json) : json_(json),
                                        ignore_(false),
                                        manipulate_caps_lock_led_(false),
+                                       manipulate_num_lock_led_(false),
                                        disable_built_in_keyboard_if_exists_(false) {
     auto ignore_configured = false;
     auto manipulate_caps_lock_led_configured = false;
+    auto manipulate_num_lock_led_configured = false;
 
     // ----------------------------------------
     // Set default value
@@ -51,6 +53,14 @@ public:
 
         manipulate_caps_lock_led_ = value.get<bool>();
         manipulate_caps_lock_led_configured = true;
+
+      } else if (key == "manipulate_num_lock_led") {
+        if (!value.is_boolean()) {
+          throw pqrs::json::unmarshal_error(fmt::format("`{0}` must be boolean, but is `{1}`", key, value.dump()));
+        }
+
+        manipulate_num_lock_led_ = value.get<bool>();
+        manipulate_num_lock_led_configured = true;
 
       } else if (key == "disable_built_in_keyboard_if_exists") {
         if (!value.is_boolean()) {
@@ -101,6 +111,13 @@ public:
         manipulate_caps_lock_led_ = true;
       }
     }
+    if (!manipulate_num_lock_led_configured) {
+      if (identifiers_.get_is_keyboard() &&
+          identifiers_.is_apple()) { //probably no need? since apple keyboard has no num lock?
+        manipulate_num_lock_led_ = true;
+      }
+    }
+
   }
 
   static nlohmann::json make_default_fn_function_keys_json(void) {
@@ -121,6 +138,7 @@ public:
     j["identifiers"] = identifiers_;
     j["ignore"] = ignore_;
     j["manipulate_caps_lock_led"] = manipulate_caps_lock_led_;
+    j["manipulate_num_lock_led"] = manipulate_num_lock_led_;
     j["disable_built_in_keyboard_if_exists"] = disable_built_in_keyboard_if_exists_;
     j["simple_modifications"] = simple_modifications_.to_json();
     j["fn_function_keys"] = fn_function_keys_.to_json();
@@ -143,6 +161,13 @@ public:
   }
   void set_manipulate_caps_lock_led(bool value) {
     manipulate_caps_lock_led_ = value;
+  }
+  
+  bool get_manipulate_num_lock_led(void) const {
+    return manipulate_num_lock_led_;
+  }
+  void set_manipulate_num_lock_led(bool value) {
+    manipulate_num_lock_led_ = value;
   }
 
   bool get_disable_built_in_keyboard_if_exists(void) const {
@@ -171,6 +196,7 @@ private:
   device_identifiers identifiers_;
   bool ignore_;
   bool manipulate_caps_lock_led_;
+  bool manipulate_num_lock_led_;
   bool disable_built_in_keyboard_if_exists_;
   simple_modifications simple_modifications_;
   simple_modifications fn_function_keys_;

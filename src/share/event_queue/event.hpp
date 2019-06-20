@@ -39,6 +39,7 @@ public:
     input_source_changed,
     system_preferences_properties_changed,
     virtual_hid_keyboard_configuration_changed,
+    num_lock_state_changed,
   };
 
   using value_t = mpark::variant<key_code,                                                 // For type::key_code
@@ -79,6 +80,8 @@ public:
             result.value_ = value.get<pointing_motion>();
           } else if (key == "caps_lock_state_changed") {
             result.value_ = value.get<int64_t>();
+          } else if (key == "num_lock_state_changed") {
+            result.value_ = value.get<int64_t>();            
           } else if (key == "shell_command") {
             result.value_ = value.get<std::string>();
           } else if (key == "input_source_specifiers") {
@@ -141,6 +144,12 @@ public:
           json["caps_lock_state_changed"] = *v;
         }
         break;
+
+      case type::num_lock_state_changed:
+        if (auto v = get_integer_value()) {
+          json["num_lock_state_changed"] = *v;
+        }
+      break;
 
       case type::shell_command:
         if (auto v = get_shell_command()) {
@@ -358,6 +367,8 @@ public:
     try {
       if (type_ == type::caps_lock_state_changed) {
         return mpark::get<int64_t>(value_);
+      } else if (type_ == type::num_lock_state_changed) {
+        return mpark::get<int64_t>(value_);
       }
     } catch (mpark::bad_variant_access&) {
     }
@@ -471,6 +482,7 @@ private:
       TO_C_STRING(device_grabbed);
       TO_C_STRING(device_ungrabbed);
       TO_C_STRING(caps_lock_state_changed);
+      TO_C_STRING(num_lock_state_changed);      
       TO_C_STRING(pointing_device_event_from_event_tap);
       TO_C_STRING(frontmost_application_changed);
       TO_C_STRING(input_source_changed);
@@ -504,6 +516,7 @@ private:
     TO_TYPE(device_grabbed);
     TO_TYPE(device_ungrabbed);
     TO_TYPE(caps_lock_state_changed);
+    TO_TYPE(num_lock_state_changed);    
     TO_TYPE(pointing_device_event_from_event_tap);
     TO_TYPE(frontmost_application_changed);
     TO_TYPE(input_source_changed);

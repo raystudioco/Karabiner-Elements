@@ -42,6 +42,8 @@ enum class key_code : uint32_t {
   spacebar = kHIDUsage_KeyboardSpacebar,
 
   caps_lock = kHIDUsage_KeyboardCapsLock,
+  num_lock = kHIDUsage_KeypadNumLock, 
+  //test to see which lock code is right. (0x53 or 0x83)
 
   f1 = kHIDUsage_KeyboardF1,
   f2 = kHIDUsage_KeyboardF2,
@@ -589,6 +591,8 @@ inline std::optional<key_code> make_key_code(modifier_flag modifier_flag) {
 
     case modifier_flag::caps_lock:
       return key_code::caps_lock;
+    case modifier_flag::num_lock:
+      return key_code::num_lock;
 
     case modifier_flag::left_control:
       return key_code::left_control;

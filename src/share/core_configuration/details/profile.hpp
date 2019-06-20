@@ -311,6 +311,31 @@ public:
     }
   }
 
+  bool get_device_manipulate_num_lock_led(const device_identifiers& identifiers) const {
+    for (const auto& d : devices_) {
+      if (d.get_identifiers() == identifiers) {
+        return d.get_manipulate_num_lock_led();
+      }
+    }
+
+    details::device d(nlohmann::json({
+        {"identifiers", identifiers},
+    }));
+    return d.get_manipulate_num_lock_led();
+  }
+
+  void set_device_manipulate_num_lock_led(const device_identifiers& identifiers,
+                                           bool manipulate_num_lock_led) {
+    add_device(identifiers);
+
+    for (auto&& device : devices_) {
+      if (device.get_identifiers() == identifiers) {
+        device.set_manipulate_num_lock_led(manipulate_num_lock_led);
+        return;
+      }
+    }
+  }
+
   bool get_device_disable_built_in_keyboard_if_exists(const device_identifiers& identifiers) const {
     for (const auto& d : devices_) {
       if (d.get_identifiers() == identifiers) {

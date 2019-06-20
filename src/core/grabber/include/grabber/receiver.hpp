@@ -79,6 +79,14 @@ public:
               break;
             }
 
+            case operation_type::num_lock_state_changed: {
+              auto num_lock_state = json.at("num_lock_state").get<bool>();
+              if (device_grabber_) {
+                device_grabber_->async_set_num_lock_state(num_lock_state);
+              }
+              break;
+            }
+
             case operation_type::connect_console_user_server: {
               auto user_core_configuration_file_path =
                   json.at("user_core_configuration_file_path").get<std::string>();

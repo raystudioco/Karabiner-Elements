@@ -4,6 +4,7 @@
 #include "device_properties.hpp"
 #include "event_queue.hpp"
 #include "hid_keyboard_caps_lock_led_state_manager.hpp"
+#include "hid_keyboard_num_lock_led_state_manager.hpp"
 #include "iokit_utility.hpp"
 #include "pressed_keys_manager.hpp"
 #include "types.hpp"
@@ -32,6 +33,8 @@ public:
     hid_queue_value_monitor_ = std::make_shared<pqrs::osx::iokit_hid_queue_value_monitor>(pqrs::dispatcher::extra::get_shared_dispatcher(),
                                                                                           device);
     caps_lock_led_state_manager_ = std::make_shared<krbn::hid_keyboard_caps_lock_led_state_manager>(device);
+    num_lock_led_state_manager_ = std::make_shared<krbn::hid_keyboard_num_lock_led_state_manager>(device);
+
     device_name_ = iokit_utility::make_device_name_for_log(device_id,
                                                            device);
     device_short_name_ = iokit_utility::make_device_name(device_id,
@@ -42,6 +45,8 @@ public:
     detach_from_dispatcher([this] {
       hid_queue_value_monitor_ = nullptr;
       caps_lock_led_state_manager_ = nullptr;
+      num_lock_led_state_manager_ = nullptr;
+      
     });
   }
 
@@ -53,6 +58,8 @@ public:
     core_configuration_ = core_configuration;
 
     control_caps_lock_led_state_manager();
+    control_num_lock_led_state_manager();
+
   }
 
   std::shared_ptr<device_properties> get_device_properties(void) const {
@@ -78,6 +85,10 @@ public:
   std::shared_ptr<hid_keyboard_caps_lock_led_state_manager> get_caps_lock_led_state_manager(void) const {
     return caps_lock_led_state_manager_;
   }
+  
+  std::shared_ptr<hid_keyboard_num_lock_led_state_manager> get_num_lock_led_state_manager(void) const {
+    return num_lock_led_state_manager_;
+  }
 
   const std::string& get_device_name(void) const {
     return device_name_;
@@ -101,6 +112,8 @@ public:
     }
 
     control_caps_lock_led_state_manager();
+    control_num_lock_led_state_manager();
+
   }
 
   bool get_disabled(void) const {
@@ -196,6 +209,25 @@ private:
     }
   }
 
+  void control_num_lock_led_state_manager(void) {
+    if (num_lock_led_state_manager_) {
+      if (device_properties_) {
+        if (auto c = core_configuration_.lock()) {
+          if (auto device_identifiers = device_properties_->get_device_identifiers()) {
+            if (c->get_selected_profile().get_device_manipulate_num_lock_led(*device_identifiers)) {
+              if (grabbed_) {
+                num_lock_led_state_manager_->async_start();
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      num_lock_led_state_manager_->async_stop();
+    }
+  }
+
   device_id device_id_;
   std::weak_ptr<const core_configuration::core_configuration> core_configuration_;
   std::shared_ptr<device_properties> device_properties_;
@@ -206,6 +238,8 @@ private:
   bool first_value_arrived_;
 
   std::shared_ptr<hid_keyboard_caps_lock_led_state_manager> caps_lock_led_state_manager_;
+  std::shared_ptr<hid_keyboard_num_lock_led_state_manager> num_lock_led_state_manager_;
+
   std::string device_name_;
   std::string device_short_name_;
 

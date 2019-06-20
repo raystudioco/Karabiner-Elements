@@ -57,6 +57,17 @@ public:
       }
     }
 
+    if (event.get_type() == event::type::num_lock_state_changed) {
+      if (auto integer_value = event.get_integer_value()) {
+        auto type = (*integer_value ? modifier_flag_manager::active_modifier_flag::type::increase_lock
+                                    : modifier_flag_manager::active_modifier_flag::type::decrease_lock);
+        modifier_flag_manager::active_modifier_flag active_modifier_flag(type,
+                                                                         modifier_flag::num_lock,
+                                                                         device_id);
+        modifier_flag_manager_.push_back_active_modifier_flag(active_modifier_flag);
+      }
+    }
+
     // Update pointing_button_manager
 
     if (auto pointing_button = event.get_pointing_button()) {

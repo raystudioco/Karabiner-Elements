@@ -110,7 +110,16 @@ static inline std::shared_ptr<queue> make_queue(device_id device_id,
                                      event,
                                      event_type::single,
                                      event);
-        }
+        } else if (*usage_page == hid_usage_page::leds &&
+                   *usage == hid_usage::led_num_lock) {
+          event_queue::event event(event_queue::event::type::num_lock_state_changed,
+                                   v.get_integer_value());
+          result->emplace_back_entry(device_id,
+                                     event_time_stamp(v.get_time_stamp()),
+                                     event,
+                                     event_type::single,
+                                     event);
+        } 
       }
     }
   }

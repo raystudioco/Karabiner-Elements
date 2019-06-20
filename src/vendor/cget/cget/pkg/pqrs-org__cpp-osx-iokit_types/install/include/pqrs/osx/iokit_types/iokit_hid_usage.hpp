@@ -31,6 +31,7 @@ constexpr iokit_hid_usage iokit_hid_usage_generic_desktop_z(kHIDUsage_GD_Z);
 constexpr iokit_hid_usage iokit_hid_usage_generic_desktop_wheel(kHIDUsage_GD_Wheel);
 
 constexpr iokit_hid_usage iokit_hid_usage_led_caps_lock(kHIDUsage_LED_CapsLock);
+constexpr iokit_hid_usage iokit_hid_usage_led_num_lock(kHIDUsage_LED_NumLock);
 
 constexpr iokit_hid_usage iokit_hid_usage_consumer_consumer_control(kHIDUsage_Csmr_ConsumerControl);
 constexpr iokit_hid_usage iokit_hid_usage_consumer_power(kHIDUsage_Csmr_Power);

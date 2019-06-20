@@ -18,6 +18,7 @@ enum class hid_usage : uint32_t {
   gd_wheel = kHIDUsage_GD_Wheel,
 
   led_caps_lock = kHIDUsage_LED_CapsLock,
+  led_num_lock = kHIDUsage_LED_NumLock,
 
   csmr_consumercontrol = kHIDUsage_Csmr_ConsumerControl,
   csmr_power = kHIDUsage_Csmr_Power,

@@ -32,6 +32,9 @@ inline std::vector<modifier_flag> get_modifier_flags(modifier modifier) {
     case modifier::caps_lock:
       return {modifier_flag::caps_lock};
 
+    case modifier::num_lock:
+      return {modifier_flag::num_lock};
+
     case modifier::command:
       return {modifier_flag::left_command, modifier_flag::right_command};
 
@@ -80,6 +83,9 @@ inline modifier get_modifier(modifier_flag modifier_flag) {
   switch (modifier_flag) {
     case modifier_flag::caps_lock:
       return modifier::caps_lock;
+
+    case modifier_flag::num_lock:
+      return modifier::num_lock;
 
     case modifier_flag::fn:
       return modifier::fn;

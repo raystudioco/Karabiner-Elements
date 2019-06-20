@@ -64,6 +64,12 @@ public:
                     client->async_caps_lock_state_changed(*state);
                   }
                 }
+              } else if (e.get_event().get_type() == event_queue::event::type::num_lock_state_changed) {
+                if (auto client = grabber_client_.lock()) {
+                  if (auto state = e.get_event().get_integer_value()) {
+                    client->async_num_lock_state_changed(*state);
+                  }
+                }
               }
             }
           });

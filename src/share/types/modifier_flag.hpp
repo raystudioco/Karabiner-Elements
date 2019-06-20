@@ -16,6 +16,7 @@ enum class modifier_flag : uint32_t {
   right_option,
   right_command,
   fn,
+  num_lock,
   end_,
 };
 
@@ -52,6 +53,8 @@ inline void from_json(const nlohmann::json& json, modifier_flag& value) {
     value = modifier_flag::zero;
   } else if (name == "caps_lock") {
     value = modifier_flag::caps_lock;
+  } else if (name == "num_lock") {
+    value = modifier_flag::num_lock;
   } else if (name == "left_control") {
     value = modifier_flag::left_control;
   } else if (name == "left_shift") {

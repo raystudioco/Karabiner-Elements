@@ -134,6 +134,19 @@ public:
     });
   }
 
+  void async_num_lock_state_changed(bool state) const {
+    enqueue_to_dispatcher([this, state] {
+      nlohmann::json json{
+          {"operation_type", operation_type::num_lock_state_changed},
+          {"num_lock_state", state},
+      };
+
+      if (client_) {
+        client_->async_send(nlohmann::json::to_msgpack(json));
+      }
+    });
+  }
+  
   void async_connect_console_user_server(void) const {
     enqueue_to_dispatcher([this] {
       nlohmann::json json{

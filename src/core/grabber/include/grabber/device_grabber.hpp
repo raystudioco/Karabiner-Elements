@@ -9,6 +9,7 @@
 #include "device_grabber_details/simple_modifications_manipulator_manager.hpp"
 #include "event_tap_utility.hpp"
 #include "hid_keyboard_caps_lock_led_state_manager.hpp"
+#include "hid_keyboard_num_lock_led_state_manager.hpp"
 #include "iokit_utility.hpp"
 #include "json_writer.hpp"
 #include "krbn_notification_center.hpp"
@@ -162,6 +163,8 @@ public:
             it->second->set_grabbed(true);
 
             update_caps_lock_led();
+
+            update_num_lock_led();
 
             update_virtual_hid_pointing();
 
@@ -384,6 +387,13 @@ public:
     });
   }
 
+  void async_set_num_lock_state(bool state) {
+    enqueue_to_dispatcher([this, state] {
+      last_num_lock_state_ = state;
+      post_num_lock_state_changed_event(state);
+      update_num_lock_led();
+    });
+  }
   void async_set_system_preferences_properties(const pqrs::osx::system_preferences::properties& value) {
     enqueue_to_dispatcher([this, value] {
       system_preferences_properties_ = value;
@@ -574,6 +584,19 @@ private:
     krbn_notification_center::get_instance().enqueue_input_event_arrived(*this);
   }
 
+  void post_num_lock_state_changed_event(bool num_lock_state) {
+    event_queue::event event(event_queue::event::type::num_lock_state_changed, num_lock_state);
+    event_queue::entry entry(device_id(0),
+                             event_queue::event_time_stamp(pqrs::osx::chrono::mach_absolute_time_point()),
+                             event,
+                             event_type::single,
+                             event);
+
+    merged_input_event_queue_->push_back_entry(entry);
+
+    krbn_notification_center::get_instance().enqueue_input_event_arrived(*this);
+  }  
+
   std::shared_ptr<probable_stuck_events_manager> add_probable_stuck_events_manager(device_id device_id) {
     auto it = probable_stuck_events_managers_.find(device_id);
     if (it != std::end(probable_stuck_events_managers_)) {
@@ -706,6 +729,19 @@ private:
       e.second->get_caps_lock_led_state_manager()->set_state(state);
     }
   }
+
+  void update_num_lock_led(void) {
+    std::optional<led_state> state;
+    if (last_num_lock_state_) {
+      state = *last_num_lock_state_ ? led_state::on : led_state::off;
+    }
+
+    for (auto&& e : entries_) {
+      e.second->get_num_lock_led_state_manager()->set_state(state);
+    }
+  }
+
+
 
   bool is_grabbed(device_id device_id,
                   absolute_time_point time_stamp) const {
@@ -858,6 +894,7 @@ private:
 
   std::unique_ptr<event_tap_monitor> event_tap_monitor_;
   std::optional<bool> last_caps_lock_state_;
+  std::optional<bool> last_num_lock_state_;
   std::unique_ptr<pqrs::osx::iokit_hid_manager> hid_manager_;
   // `operation_type::device_observed` might be received before
   // `device_grabber_details::entry` is created.
